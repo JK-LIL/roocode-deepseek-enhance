@@ -1,4 +1,4 @@
-# Roo Code DeepSeek Enhancement Patches
+# Roo Code DeepSeek Enhancement Patches | 为你的roocode启用deepseekv4模型
 
 **中文** | [English](#english)
 
