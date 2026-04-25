@@ -162,7 +162,30 @@ function patchWebviewUI() {
     // 重新组装
     content = content.substring(0, vdoIdx) + vdoCode + content.substring(vdoEnd)
 
-    // Step 5: 隐藏 DeepSeek 的 Model Picker 下拉菜单
+    // Step 5: 修复 webview 中 DeepSeek 的模型信息查找（进度条 bug）
+    // 原始: case"deepseek":{const x=e.apiModelId??s,v=WW[x];return{id:x,info:v}}
+    // 问题: WW 只有 deepseek-chat 和 deepseek-reasoner，自定义模型 ID 返回 undefined
+    // 修复: 当 WW[x] 找不到时，使用默认模型信息并应用自定义 contextWindow/maxTokens
+    const deepseekCaseOld = 'case"deepseek":{const x=e.apiModelId??s,v=WW[x];return{id:x,info:v}}'
+    const deepseekCaseNew = 'case"deepseek":{const x=e.apiModelId??s;let v=WW[x]||WW[s];if(v){v={...v};if(e.deepSeekContextWindow){v.contextWindow=e.deepSeekContextWindow}if(e.deepSeekMaxOutputTokens){v.maxTokens=e.deepSeekMaxOutputTokens}}return{id:x,info:v}}'
+    if (content.includes(deepseekCaseOld)) {
+        content = content.replace(deepseekCaseOld, deepseekCaseNew)
+        console.log("[INFO] 已修复 webview 中 DeepSeek 模型信息查找（进度条 bug）")
+    } else {
+        console.log("[WARN] 未找到 webview 中 DeepSeek case 分支")
+    }
+
+    // Step 6: 同时修复 webview 中的 DeepSeek schema（添加新字段）
+    const webviewSchemaOld = 'deepSeekBaseUrl:ae().optional(),deepSeekApiKey:ae().optional()})'
+    const webviewSchemaNew = 'deepSeekBaseUrl:ae().optional(),deepSeekApiKey:ae().optional(),deepSeekContextWindow:De().optional(),deepSeekMaxOutputTokens:De().optional()})'
+    if (content.includes(webviewSchemaOld)) {
+        content = content.replace(webviewSchemaOld, webviewSchemaNew)
+        console.log("[INFO] 已更新 webview 中 DeepSeek schema")
+    } else {
+        console.log("[WARN] 未找到 webview 中 DeepSeek schema")
+    }
+
+    // Step 7: 隐藏 DeepSeek 的 Model Picker 下拉菜单
     // kco 是排除列表，在其中的提供商不显示 Model Picker
     // 把 "deepseek" 加入排除列表，这样我们的 Model ID 文本框就是唯一的模型选择方式
     const kcoOld = 'kco=["openrouter","requesty","unbound","openai","openai-codex","litellm","vercel-ai-gateway","roo","ollama","lmstudio","vscode-lm"]'
