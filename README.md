@@ -1,5 +1,7 @@
 # Roo Code DeepSeek Enhancement Patches | 为你的roocode启用deepseekv4模型
-
+注意本项目可能已经落后虽然还可以使用但无法做到调整上下文大小作者可能不会继续更新了因为后来发现这种补丁形式细化后极不稳定
+建议换code吧 roo不适合使用deepseek
+---
 **中文** | [English](#english)
 
 ---
